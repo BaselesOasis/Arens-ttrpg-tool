@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arens Computer System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/css/jquery.terminal.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/js/jquery.terminal.min.js"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 15px;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        #background-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+        }
+        #terminal-container {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            height: calc(100vh - 30px);
+            display: flex;
+            flex-direction: column;
+        }
+        #terminal {
+            flex: 1;
+            overflow: auto !important;
+            min-height: 0;
+            background-color: rgba(0, 10, 0, 0.7);
+            padding: 10px;
+        }
+        .terminal {
+            background-color: #000 !important;
+            color: #0f0 !important;
+            font-family: 'Courier New', monospace !important;
+            height: 100% !important;
+            overflow: auto !important;
+        }
+        .terminal-output {
+            line-height: 1.4 !important;
+            word-wrap: break-word !important;
+        }
+        .prompt {
+            color: #0f0 !important;
+            font-weight: bold !important;
+        }
+        .status-bar {
+            background-color: #0a0;
+            padding: 5px 10px;
+            border-top: 1px solid #0f0;
+            font-size: 0.9em;
+            color: #0f0;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        #terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+        #terminal::-webkit-scrollbar-track {
+            background: #111;
+        }
+        #terminal::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+        }
+        #terminal::-webkit-scrollbar-thumb:hover {
+            background: #0c0;
+        }
+        .log-entry {
+            font-size: 0.8em;
+            color: #0a0;
+            margin: 2px 0;
+        }
+        .matrix-char {
+            position: absolute;
+            color: rgba(0, 255, 0, 0.1);
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+    <div id="terminal-container">
+        <div id="terminal"></div>
+        <div class="status-bar">
+            <span>Arens v2.0.4 | Status: <span class="blink">ONLINE</span></span>
+            <span id="system-time">00:00:00</span>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // System state
+            const systemState = {
+                poweredOn: true,
+                shipName: 'Das Krokodil',
+                hullIntegrity: 100,
+                coreIntegrity: 100,
+                fuel: 99,
+                oxygen: 100,
+                mode: 'Park',
+                speed: 0,
+                baseFuelConsumption: 0.1,
+                lastSpeedUpdate: Date.now(),
+                crew: [
+                    {name: "Captain Elara Vance", role: "Command", status: "Active"},
+                    {name: "Dr. Kaelen Rostov", role: "Medical Officer", status: "Active"},
+                    {name: "Chief Engineer Tarek", role: "Engineering", status: "Active"},
+                    {name: "Lt. Mira Chen", role: "Navigation", status: "Active"},
+                    {name: "Security Officer Jax", role: "Security", status: "Active"}
+                ],
+                missionLogs: [
+                    "MISSION LOG #45892: Successfully negotiated trade agreement with Vega Colony",
+                    "MISSION LOG #45893: Encountered hostile vessel in Sector 7-G. Weapons systems engaged. Threat neutralized.",
+                    "MISSION LOG #45894: Discovered ancient artifact on planet surface. Scientific analysis ongoing.",
+                    "MISSION LOG #45895: Resupplied at Kepler Station. Restocked medical supplies and weapons."
+                ],
+                systemAlerts: [
+                    "ALERT: Minor hull breach detected in sector 4-C. Sealed automatically.",
+                    "WARNING: Unidentified vessel approaching from bearing 225 mark 17.",
+                    "NOTICE: Life support systems at 98% efficiency. Maintenance recommended.",
+                    "SECURITY: Intrusion attempt detected on comms channel. Source traced and blocked."
+                ],
+                diagnostics: {
+                    cpu: "98% operational",
+                    memory: "4.2MB free / 16MB total",
+                    powerDistribution: "Nominal",
+                    networkLatency: "12ms",
+                    securityLevel: "Gamma-7"
+                }
+            };
+
+            // Calculate fuel consumption based on speed (exponential increase)
+            function calculateFuelConsumption(speed) {
+                // Base consumption plus exponential increase with speed
+                return systemState.baseFuelConsumption * (1 + Math.pow(speed / 50000, 2));
+            }
+
+            // Menu navigation stack
+            const menuStack = ['main'];
+
+            // Function to display menu based on current path
+            function displayMenu(menuPath) {
+                let menuContent = '';
+
+                switch(menuPath) {
+                    case 'main':
+                        menuContent = `
+Arens_v2.0.4/Menu
+-------------
+[1] Ship Modi
+[2] Ship Info
+[3] Omniweb
+[4] Settings
+[5] On/Off/Restart
+-------------`;
+                        break;
+
+                    case 'onoffrestart':
+                        menuContent = `
+Arens_v2.0.4/On/Off/Restart
+-------------
+[1] On
+[2] Off
+[3] Restart
+[4] Back
+-------------`;
+                        break;
+
+                    case 'shipinfo':
+                        menuContent = `
+Arens_v2.0.4/Ship Info
+-------------
+${systemState.shipName}
+Hull Integrity: ${systemState.hullIntegrity}%
+Core Integrity: ${systemState.coreIntegrity}%
+Fuel: ${systemState.fuel}%
+O₂: ${systemState.oxygen.toString().padStart(2, '0')}%
+[1] Back
+-------------`;
+                        break;
+
+                    case 'shipmodi':
+                        menuContent = `
+Arens_v2.0.4/Ship Modi
+-------------
+[1] Park
+[2] Fly
+[3] Combat
+[4] Emergency
+[5] Back
+-------------`;
+                        break;
+
+                    case 'shipmodi_fly':
+                        const currentConsumption = calculateFuelConsumption(systemState.speed).toFixed(2);
+                        menuContent = `
+Arens_v2.0.4/Ship Modi/Fly
+-------------
+Fuel: ${systemState.fuel}%
+Fuel consumption: ${currentConsumption}%/ly
+Current Speed: ${systemState.speed.toLocaleString()}km/h
+Nearest FTL Opportunity: ███████
+[1] Speed Increase
+[2] Speed Decrease
+[3] Manual Steering
+[4] Automatic Steering
+[5] Back
+-------------`;
+                        break;
+
+                    case 'omniweb':
+                        menuContent = `
+Arens_v2.0.4/Omniweb
+-------------
+[1] Galactic News
+[2] System Maps
+[3] Contact Directory
+[4] Mission Logs
+[5] Back
+-------------`;
+                        break;
+
+                    case 'settings':
+                        menuContent = `
+Arens_v2.0.4/Settings
+-------------
+[1] Display Settings
+[2] Audio Settings
+[3] Security Settings
+[4] Diagnostics
+[5] Back
+-------------`;
+                        break;
+
+                    default:
+                        menuContent = `Unknown menu path: ${menuPath}`;
+                }
+
+                return menuContent;
+            }
+
+            // Function to handle menu selection
+            function handleMenuSelection(selection, term) {
+                const currentMenu = menuStack[menuStack.length - 1];
+
+                switch(currentMenu) {
+                    case 'main':
+                        switch(selection) {
+                            case '1':
+                                menuStack.push('shipmodi');
+                                return displayMenu('shipmodi');
+                            case '2':
+                                menuStack.push('shipinfo');
+                                return displayMenu('shipinfo');
+                            case '3':
+                                menuStack.push('omniweb');
+                                return displayMenu('omniweb');
+                            case '4':
+                                menuStack.push('settings');
+                                return displayMenu('settings');
+                            case '5':
+                                menuStack.push('onoffrestart');
+                                return displayMenu('onoffrestart');
+                            default:
+                                return `Invalid selection. Please choose 1-5.`;
+                        }
+
+                    case 'onoffrestart':
+                        switch(selection) {
+                            case '1':
+                                if (systemState.poweredOn) {
+                                    return "System is already powered on.";
+                                }
+                                systemState.poweredOn = true;
+                                return "System powered on successfully.";
+                            case '2':
+                                systemState.poweredOn = false;
+                                return "WARNING: System powering down. All functions will be unavailable.";
+                            case '3':
+                                return "System restarting...\n[██████████] 100%\nSystem rebooted successfully.";
+                            case '4':
+                                menuStack.pop();
+                                return displayMenu('main');
+                            default:
+                                return `Invalid selection. Please choose 1-4.`;
+                        }
+
+                    case 'shipinfo':
+                        if (selection === '1') {
+                            menuStack.pop();
+                            return displayMenu('main');
+                        }
+                        return `Invalid selection. Please choose 1.`;
+
+                    case 'shipmodi':
+                        switch(selection) {
+                            case '1':
+                                systemState.mode = 'Park';
+                                systemState.speed = 0;
+                                return "Ship mode set to: Park. All propulsion systems offline.";
+                            case '2':
+                                menuStack.push('shipmodi_fly');
+                                return displayMenu('shipmodi_fly');
+                            case '3':
+                                systemState.mode = 'Combat';
+                                return "WARNING: Combat mode engaged. All weapons systems online. Shields at maximum.";
+                            case '4':
+                                systemState.mode = 'Emergency';
+                                return "EMERGENCY MODE ACTIVATED. Brace for impact. Sending distress signal...";
+                            case '5':
+                                menuStack.pop();
+                                return displayMenu('main');
+                            default:
+                                return `Invalid selection. Please choose 1-5.`;
+                        }
+
+                    case 'shipmodi_fly':
+                        switch(selection) {
+                            case '1':
+                                if (systemState.fuel <= 0) {
+                                    return "WARNING: Insufficient fuel. Cannot increase speed.";
+                                }
+                                systemState.speed += 10000;
+                                const increaseConsumption = calculateFuelConsumption(systemState.speed);
+                                systemState.fuel = Math.max(0, systemState.fuel - increaseConsumption * 0.1);
+                                return `Speed increased to: ${systemState.speed.toLocaleString()}km/h\nFuel consumption: ${increaseConsumption.toFixed(2)}%/ly`;
+                            case '2':
+                                systemState.speed = Math.max(0, systemState.speed - 10000);
+                                const decreaseConsumption = calculateFuelConsumption(systemState.speed);
+                                return `Speed decreased to: ${systemState.speed.toLocaleString()}km/h\nFuel consumption: ${decreaseConsumption.toFixed(2)}%/ly`;
+                            case '3':
+                                return "Manual steering engaged. Use joystick controls. Warning: High-G maneuvers may cause structural stress.";
+                            case '4':
+                                return "Automatic steering engaged. Course locked to destination. ETA: 3 days 7 hours.";
+                            case '5':
+                                menuStack.pop();
+                                return displayMenu('shipmodi');
+                            default:
+                                return `Invalid selection. Please choose 1-5.`;
+                        }
+
+                    case 'omniweb':
+                        switch(selection) {
+                            case '1':
+                                return "Galactic News Feed:\n- New trade route discovered in Sector 7\n- Diplomatic tensions rising near Orion Nebula\n- Mining colony established on Kepler-186f\n- Rare mineral deposits found on uninhabited moon";
+                            case '2':
+                                return "System Maps loading...\n[████████░░] 80%\nMaps available for:\n- Solar System\n- Alpha Centauri\n- Proxima Centauri\n- TRAPPIST-1\n- Vega Colony\n- Kepler Station";
+                            case '3':
+                                return "Contact Directory:\n- Captain Vance: Ship Command (Ext. 101)\n- Dr. Rostov: Medical Bay (Ext. 205)\n- Chief Engineer Tarek: Engineering (Ext. 301)\n- Lt. Chen: Navigation (Ext. 402)\n- Officer Jax: Security (Ext. 510)";
+                            case '4':
+                                return `${systemState.missionLogs.join('\n')}\n[1] Back`;
+                            case '5':
+                                menuStack.pop();
+                                return displayMenu('main');
+                            default:
+                                return `Invalid selection. Please choose 1-5.`;
+                        }
+
+                    case 'settings':
+                        switch(selection) {
+                            case '1':
+                                return "Display Settings:\n- Brightness: 85%\n- Contrast: 70%\n- Font Size: 12pt\n- Color Scheme: Terminal Green\n- Screen Timeout: 5 minutes";
+                            case '2':
+                                return "Audio Settings:\n- Volume: 75%\n- Alert Volume: 100%\n- Voice Commands: Disabled\n- Background Music: Off\n- Warning Tones: Enabled";
+                            case '3':
+                                return "Security Settings:\n- Login Required: Yes\n- Auto-lock: 5 minutes\n- Encryption: Level 3\n- Access Logs: Enabled\n- Biometric Scan: Active";
+                            case '4':
+                                return `System Diagnostics:\n- CPU: ${systemState.diagnostics.cpu}\n- Memory: ${systemState.diagnostics.memory}\n- Power Distribution: ${systemState.diagnostics.powerDistribution}\n- Network Latency: ${systemState.diagnostics.networkLatency}\n- Security Level: ${systemState.diagnostics.securityLevel}`;
+                            case '5':
+                                menuStack.pop();
+                                return displayMenu('main');
+                            default:
+                                return `Invalid selection. Please choose 1-5.`;
+                        }
+                }
+            }
+
+            // Hidden easter egg command
+            function handleFastfetch(term) {
+                const now = new Date();
+                return `
+                    ╭──────────────────────────────────────╮
+                    │   ARENS SYSTEM INFORMATION           │
+                    │                                      │
+                    │   OS: StarOS v7.3.1                  │
+                    │   Host: Krokodil-Class Cruiser       │
+                    │   Kernel: Quantum-9.4.2              │
+                    │   Uptime: 42 days, 7 hours           │
+                    │   Shell: Terminal v2.0.4             │
+                    │   Resolution: 80x24                  │
+                    │   WM: HoloGrid Interface             │
+                    │   CPU: Fusion Core x4 @ 5.2GHz       │
+                    │   Memory: 11.8MB / 16MB              │
+                    │   Storage: 120MB SSD                 │
+                    │   Fuel Level: ${systemState.fuel}%                 │
+                    │   Current Speed: ${systemState.speed.toLocaleString()} km/h      │
+                    │   Mode: ${systemState.mode}                   │
+                    │   Timestamp: ${now.toTimeString().split(' ')[0]}       │
+                    │                                      │
+                    │   ████████████████████████████████   │
+                    ╰──────────────────────────────────────╯
+                `.trim().replace(/^                    /gm, '');
+            }
+
+            // Initialize the terminal
+            const term = $('#terminal').terminal(function(command) {
+                const currentTime = new Date().toLocaleTimeString();
+                $('#system-time').text(currentTime);
+
+                if (!systemState.poweredOn && !['power on', 'help', 'clear'].includes(command.toLowerCase())) {
+                    this.echo("SYSTEM OFFLINE. Use 'power on' to start the system.");
+                    return;
+                }
+
+                // Handle hidden easter egg first
+                if (command.toLowerCase() === 'fastfetch') {
+                    this.echo(handleFastfetch(this));
+                    return;
+                }
+
+                // Handle special commands
+                if (command.toLowerCase() === 'help') {
+                    this.echo(`
+Arens Computer System Help:
+- Type menu numbers (1-5) to navigate
+- Type 'back' to return to previous menu
+- Type 'main' to return to main menu
+- Type 'status' to see system status
+- Type 'clear' to clear screen
+- Type 'help' to see this help message
+- Use mouse wheel to scroll through history
+                    `);
+                    return;
+                }
+
+                if (command.toLowerCase() === 'status') {
+                    this.echo(`
+System Status:
+Ship Name: ${systemState.shipName}
+Power: ${systemState.poweredOn ? 'ONLINE' : 'OFFLINE'}
+Current Mode: ${systemState.mode}
+Hull Integrity: ${systemState.hullIntegrity}%
+Core Integrity: ${systemState.coreIntegrity}%
+Fuel Level: ${systemState.fuel}%
+Oxygen Level: ${systemState.oxygen}%
+Current Speed: ${systemState.speed.toLocaleString()} km/h
+Fuel Consumption: ${calculateFuelConsumption(systemState.speed).toFixed(2)}%/ly
+                    `);
+                    return;
+                }
+
+                if (command.toLowerCase() === 'diagnostics') {
+                    this.echo(`
+Running full system diagnostics...
+[▒▒▒▒▒▒▒▒▒▒] 0%
+`);
+                    setTimeout(() => {
+                        this.echo("[████▒▒▒▒▒▒] 40%\nChecking power systems...");
+                    }, 500);
+                    setTimeout(() => {
+                        this.echo("[████████▒▒] 80%\nVerifying navigation integrity...");
+                    }, 1000);
+                    setTimeout(() => {
+                        this.echo("[██████████] 100%\nDiagnostics complete.\nAll systems nominal.");
+                    }, 1500);
+                    return;
+                }
+
+                if (command.toLowerCase() === 'crew') {
+                    let crewReport = "CREW STATUS REPORT:\n";
+                    systemState.crew.forEach(member => {
+                        crewReport += `\n- ${member.name}\n  Role: ${member.role}\n  Status: ${member.status}\n  Location: ${['Bridge', 'Medical Bay', 'Engineering', 'Quarters', 'Armory'][Math.floor(Math.random() * 5)]}`;
+                    });
+                    this.echo(crewReport);
+                    return;
+                }
+
+                if (command.toLowerCase() === 'alerts') {
+                    this.echo("SYSTEM ALERTS:\n" + systemState.systemAlerts.join('\n'));
+                    return;
+                }
+
+                if (command.toLowerCase() === 'clear') {
+                    this.clear();
+                    if (menuStack.length > 0) {
+                        this.echo(displayMenu(menuStack[menuStack.length - 1]));
+                    }
+                    return;
+                }
+
+                if (command.toLowerCase() === 'main') {
+                    menuStack.length = 1;
+                    this.echo(displayMenu('main'));
+                    return;
+                }
+
+                if (command.toLowerCase() === 'back') {
+                    if (menuStack.length > 1) {
+                        menuStack.pop();
+                        this.echo(displayMenu(menuStack[menuStack.length - 1]));
+                    } else {
+                        this.echo("Already at main menu.");
+                    }
+                    return;
+                }
+
+                if (command.toLowerCase() === 'power on') {
+                    if (systemState.poweredOn) {
+                        this.echo("System is already powered on.");
+                        return;
+                    }
+                    systemState.poweredOn = true;
+                    this.echo("Powering on Arens system...");
+                    setTimeout(() => {
+                        this.echo("[██████████] 100%");
+                        this.echo("System initialized successfully.");
+                        this.echo(displayMenu('main'));
+                    }, 1000);
+                    return;
+                }
+
+                // Handle numeric menu selections
+                const selection = command.trim();
+                if (/^[1-9]$/.test(selection)) {
+                    const response = handleMenuSelection(selection, this);
+                    this.echo(response);
+                    return;
+                }
+
+                // Handle system alerts randomly
+                if (Math.random() > 0.8 && systemState.poweredOn) {
+                    const randomAlert = systemState.systemAlerts[Math.floor(Math.random() * systemState.systemAlerts.length)];
+                    setTimeout(() => {
+                        this.echo(`\nSYSTEM ALERT: ${randomAlert}`);
+                    }, 1500);
+                }
+
+                this.echo(`Unknown command: "${command}". Type 'help' for available commands.`);
+            }, {
+                greetings: `
+┌─────────────────────────────────────────────┐
+│   ARENS COMPUTER SYSTEM v2.0.4              │
+│   Initializing...                           │
+│   Memory check: 4.2MB free                  │
+│   System integrity: 100%                    │
+│                                             │
+│   Type 'help' for command assistance        │
+│   Use mouse wheel to scroll up/down         │
+└─────────────────────────────────────────────┘
+`,
+                name: 'arens_terminal',
+                height: '100%',
+                width: '100%',
+                prompt: function() {
+                    const currentPath = menuStack.length > 0 ? menuStack.join('/') : 'main';
+                    return `Arens_v2.0.4/${currentPath}> `;
+                },
+                onInit: function() {
+                    this.echo(displayMenu('main'));
+                },
+                scrollOnEcho: true,
+                history: true,
+                historySize: 100
+            });
+
+            // Background matrix effect
+            function initMatrixBackground() {
+                const canvas = document.getElementById('background-canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const fontSize = 14;
+                const columns = canvas.width / fontSize;
+                const drops = [];
+
+                // Initialize drop positions
+                for(let i = 0; i < columns; i++) {
+                    drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+                }
+
+                // Matrix characters (simplified for performance)
+                const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/<=>^_";
+
+                function draw() {
+                    // Semi-transparent background for trail effect
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.fillStyle = "#0f0";
+                    ctx.font = fontSize + "px monospace";
+
+                    // Draw characters
+                    for(let i = 0; i < drops.length; i++) {
+                        // Random character
+                        const char = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+                        // Reset drop when it reaches bottom or randomly
+                        if(drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
+                            drops[i] = 0;
+                        }
+
+                        // Move drop down
+                        drops[i]++;
+                    }
+                }
+
+                setInterval(draw, 50);
+
+                // Resize handler
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
+            }
+
+            // System time updater
+            function updateSystemTime() {
+                setInterval(() => {
+                    const now = new Date();
+                    $('#system-time').text(now.toLocaleTimeString());
+                }, 1000);
+            }
+
+            // Initialize background and time
+            initMatrixBackground();
+            updateSystemTime();
+
+            // Add cursor blink effect
+            setInterval(() => {
+                $('.prompt span:last-child').toggleClass('blink');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
