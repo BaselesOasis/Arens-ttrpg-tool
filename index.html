@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arens Computer System</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/css/jquery.terminal.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/js/jquery.terminal.min.js"></script>
     <style>
@@ -17,6 +17,29 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
+        }
+        #background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            display: flex;
+            pointer-events: none;
+        }
+        #background-left, #background-right {
+            flex: 1;
+            overflow: hidden;
+            opacity: 0.3;
+            font-size: 0.8em;
+            padding: 20px;
+        }
+        #background-left {
+            text-align: left;
+        }
+        #background-right {
+            text-align: right;
         }
         #background-canvas {
             position: absolute;
@@ -142,14 +165,29 @@
         body.theme-emerald #terminal::-webkit-scrollbar-thumb {
             background: #4caf50;
         }
+        .background-log {
+            position: absolute;
+            color: rgba(92, 107, 192, 0.3);
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            animation: scroll-log 30s linear infinite;
+        }
+        @keyframes scroll-log {
+            from { transform: translateY(100%); }
+            to { transform: translateY(-100%); }
+        }
     </style>
 </head>
 <body class="theme-compcon">
+    <div id="background-container">
+        <div id="background-left"></div>
+        <div id="background-right"></div>
+    </div>
     <canvas id="background-canvas"></canvas>
     <div id="terminal-container">
         <div id="terminal"></div>
         <div class="status-bar">
-            <span>Arens v2.0.7 | Status: <span class="blink">ONLINE</span></span>
+            <span>Arens v2.0.8 | Status: <span class="blink">ONLINE</span></span>
             <span id="system-time">00:00:00</span>
         </div>
     </div>
@@ -196,6 +234,35 @@
                 },
                 theme: 'compcon' // Default Lancer CompCon theme
             };
+
+            // Background logs data
+            const backgroundLogs = [
+                "[SYSTEM] Memory check complete: 4.2MB free",
+                "[NAVIGATION] Course plotted to Kepler Station",
+                "[SENSORS] No hostile contacts detected",
+                "[COMMS] Standing by for incoming transmissions",
+                "[ENGINEERING] Power distribution nominal",
+                "[SECURITY] All systems secure",
+                "[LIFE SUPPORT] Oxygen levels stable at 100%",
+                "[FUEL] Current reserves: 99%",
+                "[CREW] Captain Elara Vance on duty",
+                "[WEAPONS] All systems offline - Park mode",
+                "[SHIELDS] Offline - Park mode",
+                "[SENSORS] Long range scan active",
+                "[NAVIGATION] ETA to nearest station: 3 days",
+                "[COMMS] Frequency locked to military band",
+                "[SECURITY] Access logs verified",
+                "[ENGINEERING] Core temperature normal",
+                "[MEDICAL] Sick bay ready for emergencies",
+                "[CARGO] Manifest verified - all items secure",
+                "[SENSORS] Meteor shower detected at 200,000km range",
+                "[NAVIGATION] Gravitational anomalies mapped",
+                "[COMMS] Encryption protocols active",
+                "[SECURITY] Intrusion detection system online",
+                "[ENGINEERING] Backup systems operational",
+                "[LIFE SUPPORT] CO2 scrubbers functioning at 98%",
+                "[FUEL] Consumption rate: 0.1%/ly at current speed"
+            ];
 
             // Calculate fuel consumption based on speed (exponential increase)
             function calculateFuelConsumption(speed) {
@@ -250,8 +317,8 @@
                     'back': '5'
                 },
                 'shipinfo': {
-                    'refuel': '2', 'fuel': '2', 'refuel ship': '2',
-                    'back': '1'
+                    'refuel': '1', 'fuel': '1', 'refuel ship': '1',
+                    'back': '2'
                 }
             };
 
@@ -262,7 +329,7 @@
                 switch(menuPath) {
                     case 'main':
                         menuContent = `
-Arens_v2.0.7/Menu
+Arens_v2.0.8/Menu
 =============
 [1] Ship Modi
 [2] Ship Info
@@ -274,7 +341,7 @@ Arens_v2.0.7/Menu
 
                     case 'onoffrestart':
                         menuContent = `
-Arens_v2.0.7/On/Off/Restart
+Arens_v2.0.8/On/Off/Restart
 ==========================
 [1] On
 [2] Off
@@ -285,21 +352,21 @@ Arens_v2.0.7/On/Off/Restart
 
                     case 'shipinfo':
                         menuContent = `
-Arens_v2.0.7/Ship Info
+Arens_v2.0.8/Ship Info
 =====================
 ${systemState.shipName}
 Hull Integrity: ${systemState.hullIntegrity}%
 Core Integrity: ${systemState.coreIntegrity}%
 Fuel: ${systemState.fuel}%
 O₂: ${systemState.oxygen.toString().padStart(2, '0')}%
-[1] Back
-[2] Refuel Ship
+[1] Refuel Ship
+[2] Back
 -------------`;
                         break;
 
                     case 'shipmodi':
                         menuContent = `
-Arens_v2.0.7/Ship Modi
+Arens_v2.0.8/Ship Modi
 =====================
 [1] Park
 [2] Fly
@@ -312,7 +379,7 @@ Arens_v2.0.7/Ship Modi
                     case 'shipmodi_fly':
                         const currentConsumption = calculateFuelConsumption(systemState.speed).toFixed(2);
                         menuContent = `
-Arens_v2.0.7/Ship Modi/Fly
+Arens_v2.0.8/Ship Modi/Fly
 =========================
 Fuel: ${systemState.fuel}%
 Fuel consumption: ${currentConsumption}%/ly
@@ -328,7 +395,7 @@ Nearest FTL Opportunity: ███████
 
                     case 'omniweb':
                         menuContent = `
-Arens_v2.0.7/Omniweb
+Arens_v2.0.8/Omniweb
 ===================
 [1] Galactic News
 [2] System Maps
@@ -340,7 +407,7 @@ Arens_v2.0.7/Omniweb
 
                     case 'settings':
                         menuContent = `
-Arens_v2.0.7/Settings
+Arens_v2.0.8/Settings
 ====================
 [1] Display Settings
 [2] Audio Settings
@@ -410,9 +477,6 @@ Arens_v2.0.7/Settings
 
                     case 'shipinfo':
                         if (selection === '1') {
-                            menuStack.pop();
-                            return displayMenu('main');
-                        } else if (selection === '2') {
                             if (systemState.fuel >= 100) {
                                 response = "Fuel tanks are already at maximum capacity.";
                             } else {
@@ -420,8 +484,10 @@ Arens_v2.0.7/Settings
                                 systemState.fuel = 100;
                                 response = `Refueling complete. Added ${refuelAmount}% fuel.\nFuel level now at maximum capacity.`;
                             }
-                            // Return just the response, let the terminal handle the menu display
                             return response;
+                        } else if (selection === '2') {
+                            menuStack.pop();
+                            return displayMenu('main');
                         }
                         return `Invalid selection. Please choose 1-2.\n\n${displayMenu('shipinfo')}`;
 
@@ -528,7 +594,7 @@ Arens_v2.0.7/Settings
                 }
             }
 
-            // Handle theme changes
+            // Handle theme changes - FIXED VERSION
             function handleThemeChange(themeName) {
                 // Remove all theme classes
                 $('body').removeClass('theme-compcon theme-crimson theme-emerald');
@@ -539,7 +605,12 @@ Arens_v2.0.7/Settings
                 // Update system state
                 systemState.theme = themeName;
 
-                return `Theme changed to: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
+                // Force terminal to refresh colors
+                setTimeout(() => {
+                    term.echo(`Theme changed to: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`);
+                }, 100);
+
+                return ''; // Don't return anything here, we handle the echo in the timeout
             }
 
             // Hidden easter egg command - simplified version without box formatting
@@ -554,7 +625,7 @@ OS: StarOS v7.3.1
 Host: Krokodil-Class Cruiser
 Kernel: Quantum-9.4.2
 Uptime: 42 days, 7 hours
-Shell: Terminal v2.0.7
+Shell: Terminal v2.0.8
 Resolution: 80x24
 WM: HoloGrid Interface
 CPU: Fusion Core x4 @ 5.2GHz
@@ -568,6 +639,40 @@ Timestamp: ${timestamp}
 [██████████████████████████████] 100%
 System Status: OPTIMAL
 `.trim();
+            }
+
+            // Initialize background logs
+            function initBackgroundLogs() {
+                const backgroundLeft = $('#background-left');
+                const backgroundRight = $('#background-right');
+
+                // Create multiple log entries for each side
+                for (let i = 0; i < 15; i++) {
+                    const logEntry = backgroundLogs[i % backgroundLogs.length];
+                    const logEntry2 = backgroundLogs[(i + 5) % backgroundLogs.length];
+
+                    const logElement = $('<div class="background-log"></div>').text(logEntry);
+                    const logElement2 = $('<div class="background-log"></div>').text(logEntry2);
+
+                    // Randomize animation duration and delay
+                    const duration = 20 + Math.random() * 30;
+                    const delay = Math.random() * 10;
+
+                    logElement.css({
+                        'animation-duration': `${duration}s`,
+                        'animation-delay': `${delay}s`,
+                        'top': `${Math.random() * 100}%`
+                    });
+
+                    logElement2.css({
+                        'animation-duration': `${duration}s`,
+                        'animation-delay': `${delay + 5}s`,
+                        'top': `${Math.random() * 100}%`
+                    });
+
+                    backgroundLeft.append(logElement);
+                    backgroundRight.append(logElement2);
+                }
             }
 
             // Initialize the terminal
@@ -690,11 +795,13 @@ Running full system diagnostics...
                     const themeName = command.toLowerCase().split(' ')[1];
                     const validThemes = ['compcon', 'crimson', 'emerald'];
                     if (validThemes.includes(themeName)) {
-                        this.echo(handleThemeChange(themeName));
+                        handleThemeChange(themeName);
+                        // Don't return here, the theme change will echo its own message
+                        return;
                     } else {
                         this.echo(`Invalid theme. Available themes: ${validThemes.join(', ')}`);
+                        return;
                     }
-                    return;
                 }
 
                 if (command.toLowerCase() === 'power on') {
@@ -744,13 +851,13 @@ Running full system diagnostics...
             }, {
                 greetings: `
 ┌─────────────────────────────────────────────┐
-│   ARENS COMPUTER SYSTEM v2.0.7              │
+│   ARENS COMPUTER SYSTEM v2.0.8              │
 │   Lancer RPG Edition · Comp/Con Interface   │
 │   Memory check: 4.2MB free                  │
 │   System integrity: 100%                    │
 │                                             │
 │   Type 'help' for command assistance        │
-│   Fixed in v2.0.7: Refueling system bug    │
+│   New in v2.0.8: Background system logs     │
 │   Use mouse wheel to scroll up/down         │
 └─────────────────────────────────────────────┘
 `,
@@ -759,7 +866,7 @@ Running full system diagnostics...
                 width: '100%',
                 prompt: function() {
                     const currentPath = menuStack.length > 0 ? menuStack.join('/') : 'main';
-                    return `Arens_v2.0.7/${currentPath}> `;
+                    return `Arens_v2.0.8/${currentPath}> `;
                 },
                 onInit: function() {
                     this.echo(displayMenu('main'));
@@ -831,6 +938,7 @@ Running full system diagnostics...
 
             // Initialize background and time
             initMatrixBackground();
+            initBackgroundLogs();
             updateSystemTime();
 
             // Add cursor blink effect
