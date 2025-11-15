@@ -102,6 +102,46 @@
             font-size: 18px;
             font-family: 'Courier New', monospace;
         }
+        /* Theme styles */
+        body.theme-red {
+            color: #f88;
+        }
+        body.theme-red .terminal, body.theme-red #terminal {
+            background-color: rgba(10, 0, 0, 0.8) !important;
+        }
+        body.theme-red .status-bar, body.theme-red #terminal-container {
+            border-color: #f88;
+            box-shadow: 0 0 20px rgba(255, 136, 136, 0.3);
+        }
+        body.theme-red #terminal::-webkit-scrollbar-thumb {
+            background: #f88;
+        }
+        body.theme-blue {
+            color: #88f;
+        }
+        body.theme-blue .terminal, body.theme-blue #terminal {
+            background-color: rgba(0, 0, 10, 0.8) !important;
+        }
+        body.theme-blue .status-bar, body.theme-blue #terminal-container {
+            border-color: #88f;
+            box-shadow: 0 0 20px rgba(136, 136, 255, 0.3);
+        }
+        body.theme-blue #terminal::-webkit-scrollbar-thumb {
+            background: #88f;
+        }
+        body.theme-amber {
+            color: #ff8;
+        }
+        body.theme-amber .terminal, body.theme-amber #terminal {
+            background-color: rgba(10, 10, 0, 0.8) !important;
+        }
+        body.theme-amber .status-bar, body.theme-amber #terminal-container {
+            border-color: #ff8;
+            box-shadow: 0 0 20px rgba(255, 255, 136, 0.3);
+        }
+        body.theme-amber #terminal::-webkit-scrollbar-thumb {
+            background: #ff8;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +149,7 @@
     <div id="terminal-container">
         <div id="terminal"></div>
         <div class="status-bar">
-            <span>Arens v2.0.4 | Status: <span class="blink">ONLINE</span></span>
+            <span>Arens v2.0.5 | Status: <span class="blink">ONLINE</span></span>
             <span id="system-time">00:00:00</span>
         </div>
     </div>
@@ -153,7 +193,8 @@
                     powerDistribution: "Nominal",
                     networkLatency: "12ms",
                     securityLevel: "Gamma-7"
-                }
+                },
+                theme: 'green' // Default theme
             };
 
             // Calculate fuel consumption based on speed (exponential increase)
@@ -165,6 +206,51 @@
             // Menu navigation stack
             const menuStack = ['main'];
 
+            // Command mappings for alternative text inputs
+            const commandMappings = {
+                'main': {
+                    'ship modi': '1', 'modi': '1', 'ship': '1',
+                    'ship info': '2', 'info': '2',
+                    'omniweb': '3', 'web': '3', 'internet': '3',
+                    'settings': '4', 'setting': '4',
+                    'on/off/restart': '5', 'power': '5', 'restart': '5'
+                },
+                'onoffrestart': {
+                    'on': '1', 'power on': '1',
+                    'off': '2', 'power off': '2',
+                    'restart': '3', 'reboot': '3',
+                    'back': '4'
+                },
+                'shipmodi': {
+                    'park': '1',
+                    'fly': '2', 'flight': '2',
+                    'combat': '3', 'battle': '3',
+                    'emergency': '4', 'emergency mode': '4',
+                    'back': '5'
+                },
+                'shipmodi_fly': {
+                    'speed increase': '1', 'increase': '1', 'faster': '1',
+                    'speed decrease': '2', 'decrease': '2', 'slower': '2',
+                    'manual steering': '3', 'manual': '3',
+                    'automatic steering': '4', 'auto': '4', 'automatic': '4',
+                    'back': '5'
+                },
+                'omniweb': {
+                    'galactic news': '1', 'news': '1',
+                    'system maps': '2', 'maps': '2',
+                    'contact directory': '3', 'contacts': '3', 'directory': '3',
+                    'mission logs': '4', 'logs': '4', 'missions': '4',
+                    'back': '5'
+                },
+                'settings': {
+                    'display settings': '1', 'display': '1', 'theme': '1',
+                    'audio settings': '2', 'audio': '2', 'sound': '2',
+                    'security settings': '3', 'security': '3',
+                    'diagnostics': '4', 'system diagnostics': '4',
+                    'back': '5'
+                }
+            };
+
             // Function to display menu based on current path
             function displayMenu(menuPath) {
                 let menuContent = '';
@@ -172,7 +258,7 @@
                 switch(menuPath) {
                     case 'main':
                         menuContent = `
-Arens_v2.0.4/Menu
+Arens_v2.0.5/Menu
 -------------
 [1] Ship Modi
 [2] Ship Info
@@ -184,7 +270,7 @@ Arens_v2.0.4/Menu
 
                     case 'onoffrestart':
                         menuContent = `
-Arens_v2.0.4/On/Off/Restart
+Arens_v2.0.5/On/Off/Restart
 -------------
 [1] On
 [2] Off
@@ -195,7 +281,7 @@ Arens_v2.0.4/On/Off/Restart
 
                     case 'shipinfo':
                         menuContent = `
-Arens_v2.0.4/Ship Info
+Arens_v2.0.5/Ship Info
 -------------
 ${systemState.shipName}
 Hull Integrity: ${systemState.hullIntegrity}%
@@ -208,7 +294,7 @@ O₂: ${systemState.oxygen.toString().padStart(2, '0')}%
 
                     case 'shipmodi':
                         menuContent = `
-Arens_v2.0.4/Ship Modi
+Arens_v2.0.5/Ship Modi
 -------------
 [1] Park
 [2] Fly
@@ -221,7 +307,7 @@ Arens_v2.0.4/Ship Modi
                     case 'shipmodi_fly':
                         const currentConsumption = calculateFuelConsumption(systemState.speed).toFixed(2);
                         menuContent = `
-Arens_v2.0.4/Ship Modi/Fly
+Arens_v2.0.5/Ship Modi/Fly
 -------------
 Fuel: ${systemState.fuel}%
 Fuel consumption: ${currentConsumption}%/ly
@@ -237,7 +323,7 @@ Nearest FTL Opportunity: ███████
 
                     case 'omniweb':
                         menuContent = `
-Arens_v2.0.4/Omniweb
+Arens_v2.0.5/Omniweb
 -------------
 [1] Galactic News
 [2] System Maps
@@ -249,7 +335,7 @@ Arens_v2.0.4/Omniweb
 
                     case 'settings':
                         menuContent = `
-Arens_v2.0.4/Settings
+Arens_v2.0.5/Settings
 -------------
 [1] Display Settings
 [2] Audio Settings
@@ -269,6 +355,7 @@ Arens_v2.0.4/Settings
             // Function to handle menu selection
             function handleMenuSelection(selection, term) {
                 const currentMenu = menuStack[menuStack.length - 1];
+                let response = '';
 
                 switch(currentMenu) {
                     case 'main':
@@ -296,20 +383,24 @@ Arens_v2.0.4/Settings
                         switch(selection) {
                             case '1':
                                 if (systemState.poweredOn) {
-                                    return "System is already powered on.";
+                                    response = "System is already powered on.";
+                                } else {
+                                    systemState.poweredOn = true;
+                                    response = "System powered on successfully.";
                                 }
-                                systemState.poweredOn = true;
-                                return "System powered on successfully.";
+                                return response + "\n\n" + displayMenu('onoffrestart');
                             case '2':
                                 systemState.poweredOn = false;
-                                return "WARNING: System powering down. All functions will be unavailable.";
+                                response = "WARNING: System powering down. All functions will be unavailable.";
+                                return response + "\n\n" + displayMenu('onoffrestart');
                             case '3':
-                                return "System restarting...\n[██████████] 100%\nSystem rebooted successfully.";
+                                response = "System restarting...\n[██████████] 100%\nSystem rebooted successfully.";
+                                return response + "\n\n" + displayMenu('onoffrestart');
                             case '4':
                                 menuStack.pop();
                                 return displayMenu('main');
                             default:
-                                return `Invalid selection. Please choose 1-4.`;
+                                return `Invalid selection. Please choose 1-4.\n\n${displayMenu('onoffrestart')}`;
                         }
 
                     case 'shipinfo':
@@ -317,116 +408,167 @@ Arens_v2.0.4/Settings
                             menuStack.pop();
                             return displayMenu('main');
                         }
-                        return `Invalid selection. Please choose 1.`;
+                        return `Invalid selection. Please choose 1.\n\n${displayMenu('shipinfo')}`;
 
                     case 'shipmodi':
                         switch(selection) {
                             case '1':
                                 systemState.mode = 'Park';
                                 systemState.speed = 0;
-                                return "Ship mode set to: Park. All propulsion systems offline.";
+                                response = "Ship mode set to: Park. All propulsion systems offline.";
+                                break;
                             case '2':
                                 menuStack.push('shipmodi_fly');
                                 return displayMenu('shipmodi_fly');
                             case '3':
                                 systemState.mode = 'Combat';
-                                return "WARNING: Combat mode engaged. All weapons systems online. Shields at maximum.";
+                                response = "WARNING: Combat mode engaged. All weapons systems online. Shields at maximum.";
+                                break;
                             case '4':
                                 systemState.mode = 'Emergency';
-                                return "EMERGENCY MODE ACTIVATED. Brace for impact. Sending distress signal...";
+                                response = "EMERGENCY MODE ACTIVATED. Brace for impact. Sending distress signal...";
+                                break;
                             case '5':
                                 menuStack.pop();
                                 return displayMenu('main');
                             default:
-                                return `Invalid selection. Please choose 1-5.`;
+                                return `Invalid selection. Please choose 1-5.\n\n${displayMenu('shipmodi')}`;
                         }
+                        return response + "\n\n" + displayMenu('shipmodi');
 
                     case 'shipmodi_fly':
                         switch(selection) {
                             case '1':
                                 if (systemState.fuel <= 0) {
-                                    return "WARNING: Insufficient fuel. Cannot increase speed.";
+                                    response = "WARNING: Insufficient fuel. Cannot increase speed.";
+                                } else {
+                                    systemState.speed += 10000;
+                                    const increaseConsumption = calculateFuelConsumption(systemState.speed);
+                                    systemState.fuel = Math.max(0, systemState.fuel - increaseConsumption * 0.1);
+                                    response = `Speed increased to: ${systemState.speed.toLocaleString()}km/h\nFuel consumption: ${increaseConsumption.toFixed(2)}%/ly`;
                                 }
-                                systemState.speed += 10000;
-                                const increaseConsumption = calculateFuelConsumption(systemState.speed);
-                                systemState.fuel = Math.max(0, systemState.fuel - increaseConsumption * 0.1);
-                                return `Speed increased to: ${systemState.speed.toLocaleString()}km/h\nFuel consumption: ${increaseConsumption.toFixed(2)}%/ly`;
+                                break;
                             case '2':
                                 systemState.speed = Math.max(0, systemState.speed - 10000);
                                 const decreaseConsumption = calculateFuelConsumption(systemState.speed);
-                                return `Speed decreased to: ${systemState.speed.toLocaleString()}km/h\nFuel consumption: ${decreaseConsumption.toFixed(2)}%/ly`;
+                                response = `Speed decreased to: ${systemState.speed.toLocaleString()}km/h\nFuel consumption: ${decreaseConsumption.toFixed(2)}%/ly`;
+                                break;
                             case '3':
-                                return "Manual steering engaged. Use joystick controls. Warning: High-G maneuvers may cause structural stress.";
+                                response = "Manual steering engaged. Use joystick controls. Warning: High-G maneuvers may cause structural stress.";
+                                break;
                             case '4':
-                                return "Automatic steering engaged. Course locked to destination. ETA: 3 days 7 hours.";
+                                response = "Automatic steering engaged. Course locked to destination. ETA: 3 days 7 hours.";
+                                break;
                             case '5':
                                 menuStack.pop();
                                 return displayMenu('shipmodi');
                             default:
-                                return `Invalid selection. Please choose 1-5.`;
+                                return `Invalid selection. Please choose 1-5.\n\n${displayMenu('shipmodi_fly')}`;
                         }
+                        return response + "\n\n" + displayMenu('shipmodi_fly');
 
                     case 'omniweb':
                         switch(selection) {
                             case '1':
-                                return "Galactic News Feed:\n- New trade route discovered in Sector 7\n- Diplomatic tensions rising near Orion Nebula\n- Mining colony established on Kepler-186f\n- Rare mineral deposits found on uninhabited moon";
+                                response = "Galactic News Feed:\n- New trade route discovered in Sector 7\n- Diplomatic tensions rising near Orion Nebula\n- Mining colony established on Kepler-186f\n- Rare mineral deposits found on uninhabited moon";
+                                break;
                             case '2':
-                                return "System Maps loading...\n[████████░░] 80%\nMaps available for:\n- Solar System\n- Alpha Centauri\n- Proxima Centauri\n- TRAPPIST-1\n- Vega Colony\n- Kepler Station";
+                                response = "System Maps loading...\n[████████░░] 80%\nMaps available for:\n- Solar System\n- Alpha Centauri\n- Proxima Centauri\n- TRAPPIST-1\n- Vega Colony\n- Kepler Station";
+                                break;
                             case '3':
-                                return "Contact Directory:\n- Captain Vance: Ship Command (Ext. 101)\n- Dr. Rostov: Medical Bay (Ext. 205)\n- Chief Engineer Tarek: Engineering (Ext. 301)\n- Lt. Chen: Navigation (Ext. 402)\n- Officer Jax: Security (Ext. 510)";
+                                response = "Contact Directory:\n- Captain Vance: Ship Command (Ext. 101)\n- Dr. Rostov: Medical Bay (Ext. 205)\n- Chief Engineer Tarek: Engineering (Ext. 301)\n- Lt. Chen: Navigation (Ext. 402)\n- Officer Jax: Security (Ext. 510)";
+                                break;
                             case '4':
-                                return `${systemState.missionLogs.join('\n')}\n[1] Back`;
+                                response = `${systemState.missionLogs.join('\n')}`;
+                                break;
                             case '5':
                                 menuStack.pop();
                                 return displayMenu('main');
                             default:
-                                return `Invalid selection. Please choose 1-5.`;
+                                return `Invalid selection. Please choose 1-5.\n\n${displayMenu('omniweb')}`;
                         }
+                        return response + "\n\n" + displayMenu('omniweb');
 
                     case 'settings':
                         switch(selection) {
                             case '1':
-                                return "Display Settings:\n- Brightness: 85%\n- Contrast: 70%\n- Font Size: 12pt\n- Color Scheme: Terminal Green\n- Screen Timeout: 5 minutes";
+                                response = "Display Settings:\n- Current Theme: " + systemState.theme.charAt(0).toUpperCase() + systemState.theme.slice(1) + "\n- Brightness: 85%\n- Contrast: 70%\n- Font Size: 12pt\n- Screen Timeout: 5 minutes\n\nAvailable Themes: green, red, blue, amber";
+                                break;
                             case '2':
-                                return "Audio Settings:\n- Volume: 75%\n- Alert Volume: 100%\n- Voice Commands: Disabled\n- Background Music: Off\n- Warning Tones: Enabled";
+                                response = "Audio Settings:\n- Volume: 75%\n- Alert Volume: 100%\n- Voice Commands: Disabled\n- Background Music: Off\n- Warning Tones: Enabled";
+                                break;
                             case '3':
-                                return "Security Settings:\n- Login Required: Yes\n- Auto-lock: 5 minutes\n- Encryption: Level 3\n- Access Logs: Enabled\n- Biometric Scan: Active";
+                                response = "Security Settings:\n- Login Required: Yes\n- Auto-lock: 5 minutes\n- Encryption: Level 3\n- Access Logs: Enabled\n- Biometric Scan: Active";
+                                break;
                             case '4':
-                                return `System Diagnostics:\n- CPU: ${systemState.diagnostics.cpu}\n- Memory: ${systemState.diagnostics.memory}\n- Power Distribution: ${systemState.diagnostics.powerDistribution}\n- Network Latency: ${systemState.diagnostics.networkLatency}\n- Security Level: ${systemState.diagnostics.securityLevel}`;
+                                response = `System Diagnostics:\n- CPU: ${systemState.diagnostics.cpu}\n- Memory: ${systemState.diagnostics.memory}\n- Power Distribution: ${systemState.diagnostics.powerDistribution}\n- Network Latency: ${systemState.diagnostics.networkLatency}\n- Security Level: ${systemState.diagnostics.securityLevel}`;
+                                break;
                             case '5':
                                 menuStack.pop();
                                 return displayMenu('main');
                             default:
-                                return `Invalid selection. Please choose 1-5.`;
+                                return `Invalid selection. Please choose 1-5.\n\n${displayMenu('settings')}`;
                         }
+                        return response + "\n\n" + displayMenu('settings');
                 }
             }
 
-            // Hidden easter egg command
+            // Handle theme changes
+            function handleThemeChange(themeName) {
+                // Remove all theme classes
+                $('body').removeClass('theme-green theme-red theme-blue theme-amber');
+
+                // Add new theme class if not default green
+                if (themeName !== 'green') {
+                    $('body').addClass(`theme-${themeName}`);
+                }
+
+                // Update system state
+                systemState.theme = themeName;
+
+                return `Theme changed to: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
+            }
+
+            // Hidden easter egg command - with proper formatting
             function handleFastfetch(term) {
                 const now = new Date();
+                const timestamp = now.toTimeString().split(' ')[0];
+
+                // Create a properly formatted box with alignment
+                const boxWidth = 42; // Width of the box
+                const header = "ARENS SYSTEM INFORMATION";
+                const padding = Math.floor((boxWidth - header.length - 4) / 2);
+
+                // Helper function to create a properly aligned line
+                function createLine(label, value) {
+                    const totalWidth = boxWidth - 4; // Subtract box borders and spaces
+                    const labelWidth = 18; // Fixed width for labels
+                    const valueWidth = totalWidth - labelWidth;
+                    return `│   ${label.padEnd(labelWidth)}${value.padStart(valueWidth)}   │`;
+                }
+
                 return `
-                    ╭──────────────────────────────────────╮
-                    │   ARENS SYSTEM INFORMATION           │
-                    │                                      │
-                    │   OS: StarOS v7.3.1                  │
-                    │   Host: Krokodil-Class Cruiser       │
-                    │   Kernel: Quantum-9.4.2              │
-                    │   Uptime: 42 days, 7 hours           │
-                    │   Shell: Terminal v2.0.4             │
-                    │   Resolution: 80x24                  │
-                    │   WM: HoloGrid Interface             │
-                    │   CPU: Fusion Core x4 @ 5.2GHz       │
-                    │   Memory: 11.8MB / 16MB              │
-                    │   Storage: 120MB SSD                 │
-                    │   Fuel Level: ${systemState.fuel}%                 │
-                    │   Current Speed: ${systemState.speed.toLocaleString()} km/h      │
-                    │   Mode: ${systemState.mode}                   │
-                    │   Timestamp: ${now.toTimeString().split(' ')[0]}       │
-                    │                                      │
-                    │   ████████████████████████████████   │
-                    ╰──────────────────────────────────────╯
-                `.trim().replace(/^                    /gm, '');
+╭${'─'.repeat(boxWidth - 2)}╮
+│${' '.repeat(padding)}${header}${' '.repeat(boxWidth - 4 - padding - header.length)}│
+│${' '.repeat(boxWidth - 4)}│
+${createLine('OS:', 'StarOS v7.3.1')}
+${createLine('Host:', 'Krokodil-Class Cruiser')}
+${createLine('Kernel:', 'Quantum-9.4.2')}
+${createLine('Uptime:', '42 days, 7 hours')}
+${createLine('Shell:', 'Terminal v2.0.5')}
+${createLine('Resolution:', '80x24')}
+${createLine('WM:', 'HoloGrid Interface')}
+${createLine('CPU:', 'Fusion Core x4 @ 5.2GHz')}
+${createLine('Memory:', '11.8MB / 16MB')}
+${createLine('Storage:', '120MB SSD')}
+${createLine('Fuel Level:', `${systemState.fuel}%`)}
+${createLine('Current Speed:', `${systemState.speed.toLocaleString()} km/h`)}
+${createLine('Mode:', systemState.mode)}
+${createLine('Timestamp:', timestamp)}
+│${' '.repeat(boxWidth - 4)}│
+│   ${'█'.repeat(30).padEnd(boxWidth - 8)}   │
+╰${'─'.repeat(boxWidth - 2)}╯
+`.trim();
             }
 
             // Initialize the terminal
@@ -450,8 +592,7 @@ Arens_v2.0.4/Settings
                     this.echo(`
 Arens Computer System Help:
 - Type menu numbers (1-5) to navigate
-- Type 'back' to return to previous menu
-- Type 'main' to return to main menu
+- Type text commands like 'back', 'ship info', 'combat mode' etc.
 - Type 'status' to see system status
 - Type 'clear' to clear screen
 - Type 'help' to see this help message
@@ -531,6 +672,18 @@ Running full system diagnostics...
                     return;
                 }
 
+                // Handle theme commands
+                if (command.toLowerCase().startsWith('theme ')) {
+                    const themeName = command.toLowerCase().split(' ')[1];
+                    const validThemes = ['green', 'red', 'blue', 'amber'];
+                    if (validThemes.includes(themeName)) {
+                        this.echo(handleThemeChange(themeName));
+                    } else {
+                        this.echo(`Invalid theme. Available themes: ${validThemes.join(', ')}`);
+                    }
+                    return;
+                }
+
                 if (command.toLowerCase() === 'power on') {
                     if (systemState.poweredOn) {
                         this.echo("System is already powered on.");
@@ -543,6 +696,18 @@ Running full system diagnostics...
                         this.echo("System initialized successfully.");
                         this.echo(displayMenu('main'));
                     }, 1000);
+                    return;
+                }
+
+                // Handle command mappings for current menu
+                const currentMenu = menuStack[menuStack.length - 1];
+                const normalizedCommand = command.toLowerCase().trim();
+
+                // Check if this is a mapped command for the current menu
+                if (commandMappings[currentMenu] && commandMappings[currentMenu][normalizedCommand]) {
+                    const selection = commandMappings[currentMenu][normalizedCommand];
+                    const response = handleMenuSelection(selection, this);
+                    this.echo(response);
                     return;
                 }
 
@@ -566,12 +731,13 @@ Running full system diagnostics...
             }, {
                 greetings: `
 ┌─────────────────────────────────────────────┐
-│   ARENS COMPUTER SYSTEM v2.0.4              │
+│   ARENS COMPUTER SYSTEM v2.0.5              │
 │   Initializing...                           │
 │   Memory check: 4.2MB free                  │
 │   System integrity: 100%                    │
 │                                             │
 │   Type 'help' for command assistance        │
+│   New in v2.0.5: Text command support       │
 │   Use mouse wheel to scroll up/down         │
 └─────────────────────────────────────────────┘
 `,
@@ -580,7 +746,7 @@ Running full system diagnostics...
                 width: '100%',
                 prompt: function() {
                     const currentPath = menuStack.length > 0 ? menuStack.join('/') : 'main';
-                    return `Arens_v2.0.4/${currentPath}> `;
+                    return `Arens_v2.0.5/${currentPath}> `;
                 },
                 onInit: function() {
                     this.echo(displayMenu('main'));
