@@ -9,8 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/js/jquery.terminal.min.js"></script>
     <style>
         body {
-            background-color: #000;
-            color: #0f0;
+            background-color: #0a0e17;
+            color: #64b5f6;
             font-family: 'Courier New', monospace;
             margin: 0;
             padding: 15px;
@@ -25,17 +25,17 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            opacity: 0.15;
+            opacity: 0.1;
         }
         #terminal-container {
             position: relative;
             z-index: 10;
             max-width: 900px;
             margin: 0 auto;
-            border: 2px solid #0f0;
-            border-radius: 8px;
+            border: 2px solid #5c6bc0;
+            border-radius: 4px;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(92, 107, 192, 0.4);
             height: calc(100vh - 30px);
             display: flex;
             flex-direction: column;
@@ -44,12 +44,12 @@
             flex: 1;
             overflow: auto !important;
             min-height: 0;
-            background-color: rgba(0, 10, 0, 0.7);
+            background-color: rgba(10, 14, 23, 0.85);
             padding: 10px;
         }
         .terminal {
-            background-color: #000 !important;
-            color: #0f0 !important;
+            background-color: #0a0e17 !important;
+            color: #64b5f6 !important;
             font-family: 'Courier New', monospace !important;
             height: 100% !important;
             overflow: auto !important;
@@ -59,15 +59,15 @@
             word-wrap: break-word !important;
         }
         .prompt {
-            color: #0f0 !important;
+            color: #5c6bc0 !important;
             font-weight: bold !important;
         }
         .status-bar {
-            background-color: #0a0;
+            background-color: #1a237e;
             padding: 5px 10px;
-            border-top: 1px solid #0f0;
+            border-top: 1px solid #5c6bc0;
             font-size: 0.9em;
-            color: #0f0;
+            color: #bbdefb;
             flex-shrink: 0;
             display: flex;
             justify-content: space-between;
@@ -82,74 +82,74 @@
             width: 8px;
         }
         #terminal::-webkit-scrollbar-track {
-            background: #111;
+            background: #1a237e;
         }
         #terminal::-webkit-scrollbar-thumb {
-            background: #0f0;
+            background: #5c6bc0;
             border-radius: 4px;
         }
         #terminal::-webkit-scrollbar-thumb:hover {
-            background: #0c0;
+            background: #3949ab;
         }
         .log-entry {
             font-size: 0.8em;
-            color: #0a0;
+            color: #9fa8da;
             margin: 2px 0;
         }
         .matrix-char {
             position: absolute;
-            color: rgba(0, 255, 0, 0.1);
+            color: rgba(92, 107, 192, 0.1);
             font-size: 18px;
             font-family: 'Courier New', monospace;
         }
-        /* Theme styles */
-        body.theme-red {
-            color: #f88;
+        /* Lancer Comp/Con theme styles */
+        body.theme-compcon {
+            color: #64b5f6;
         }
-        body.theme-red .terminal, body.theme-red #terminal {
-            background-color: rgba(10, 0, 0, 0.8) !important;
+        body.theme-compcon .terminal, body.theme-compcon #terminal {
+            background-color: rgba(10, 14, 23, 0.85) !important;
         }
-        body.theme-red .status-bar, body.theme-red #terminal-container {
-            border-color: #f88;
-            box-shadow: 0 0 20px rgba(255, 136, 136, 0.3);
+        body.theme-compcon .status-bar, body.theme-compcon #terminal-container {
+            border-color: #5c6bc0;
+            box-shadow: 0 0 15px rgba(92, 107, 192, 0.4);
         }
-        body.theme-red #terminal::-webkit-scrollbar-thumb {
-            background: #f88;
+        body.theme-compcon #terminal::-webkit-scrollbar-thumb {
+            background: #5c6bc0;
         }
-        body.theme-blue {
-            color: #88f;
+        body.theme-crimson {
+            color: #f44336;
         }
-        body.theme-blue .terminal, body.theme-blue #terminal {
-            background-color: rgba(0, 0, 10, 0.8) !important;
+        body.theme-crimson .terminal, body.theme-crimson #terminal {
+            background-color: rgba(25, 10, 10, 0.85) !important;
         }
-        body.theme-blue .status-bar, body.theme-blue #terminal-container {
-            border-color: #88f;
-            box-shadow: 0 0 20px rgba(136, 136, 255, 0.3);
+        body.theme-crimson .status-bar, body.theme-crimson #terminal-container {
+            border-color: #f44336;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.4);
         }
-        body.theme-blue #terminal::-webkit-scrollbar-thumb {
-            background: #88f;
+        body.theme-crimson #terminal::-webkit-scrollbar-thumb {
+            background: #f44336;
         }
-        body.theme-amber {
-            color: #ff8;
+        body.theme-emerald {
+            color: #4caf50;
         }
-        body.theme-amber .terminal, body.theme-amber #terminal {
-            background-color: rgba(10, 10, 0, 0.8) !important;
+        body.theme-emerald .terminal, body.theme-emerald #terminal {
+            background-color: rgba(10, 25, 15, 0.85) !important;
         }
-        body.theme-amber .status-bar, body.theme-amber #terminal-container {
-            border-color: #ff8;
-            box-shadow: 0 0 20px rgba(255, 255, 136, 0.3);
+        body.theme-emerald .status-bar, body.theme-emerald #terminal-container {
+            border-color: #4caf50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
         }
-        body.theme-amber #terminal::-webkit-scrollbar-thumb {
-            background: #ff8;
+        body.theme-emerald #terminal::-webkit-scrollbar-thumb {
+            background: #4caf50;
         }
     </style>
 </head>
-<body>
+<body class="theme-compcon">
     <canvas id="background-canvas"></canvas>
     <div id="terminal-container">
         <div id="terminal"></div>
         <div class="status-bar">
-            <span>Arens v2.0.5 | Status: <span class="blink">ONLINE</span></span>
+            <span>Arens v2.0.7 | Status: <span class="blink">ONLINE</span></span>
             <span id="system-time">00:00:00</span>
         </div>
     </div>
@@ -194,7 +194,7 @@
                     networkLatency: "12ms",
                     securityLevel: "Gamma-7"
                 },
-                theme: 'green' // Default theme
+                theme: 'compcon' // Default Lancer CompCon theme
             };
 
             // Calculate fuel consumption based on speed (exponential increase)
@@ -209,8 +209,8 @@
             // Command mappings for alternative text inputs
             const commandMappings = {
                 'main': {
-                    'ship modi': '1', 'modi': '1', 'ship': '1',
-                    'ship info': '2', 'info': '2',
+                    'ship modi': '1', 'modi': '1', 'ship': '1', 'mode': '1',
+                    'ship info': '2', 'info': '2', 'status': '2',
                     'omniweb': '3', 'web': '3', 'internet': '3',
                     'settings': '4', 'setting': '4',
                     'on/off/restart': '5', 'power': '5', 'restart': '5'
@@ -229,8 +229,8 @@
                     'back': '5'
                 },
                 'shipmodi_fly': {
-                    'speed increase': '1', 'increase': '1', 'faster': '1',
-                    'speed decrease': '2', 'decrease': '2', 'slower': '2',
+                    'speed increase': '1', 'increase': '1', 'faster': '1', 'accelerate': '1',
+                    'speed decrease': '2', 'decrease': '2', 'slower': '2', 'decelerate': '2',
                     'manual steering': '3', 'manual': '3',
                     'automatic steering': '4', 'auto': '4', 'automatic': '4',
                     'back': '5'
@@ -248,6 +248,10 @@
                     'security settings': '3', 'security': '3',
                     'diagnostics': '4', 'system diagnostics': '4',
                     'back': '5'
+                },
+                'shipinfo': {
+                    'refuel': '2', 'fuel': '2', 'refuel ship': '2',
+                    'back': '1'
                 }
             };
 
@@ -258,8 +262,8 @@
                 switch(menuPath) {
                     case 'main':
                         menuContent = `
-Arens_v2.0.5/Menu
--------------
+Arens_v2.0.7/Menu
+=============
 [1] Ship Modi
 [2] Ship Info
 [3] Omniweb
@@ -270,8 +274,8 @@ Arens_v2.0.5/Menu
 
                     case 'onoffrestart':
                         menuContent = `
-Arens_v2.0.5/On/Off/Restart
--------------
+Arens_v2.0.7/On/Off/Restart
+==========================
 [1] On
 [2] Off
 [3] Restart
@@ -281,21 +285,22 @@ Arens_v2.0.5/On/Off/Restart
 
                     case 'shipinfo':
                         menuContent = `
-Arens_v2.0.5/Ship Info
--------------
+Arens_v2.0.7/Ship Info
+=====================
 ${systemState.shipName}
 Hull Integrity: ${systemState.hullIntegrity}%
 Core Integrity: ${systemState.coreIntegrity}%
 Fuel: ${systemState.fuel}%
 O₂: ${systemState.oxygen.toString().padStart(2, '0')}%
 [1] Back
+[2] Refuel Ship
 -------------`;
                         break;
 
                     case 'shipmodi':
                         menuContent = `
-Arens_v2.0.5/Ship Modi
--------------
+Arens_v2.0.7/Ship Modi
+=====================
 [1] Park
 [2] Fly
 [3] Combat
@@ -307,8 +312,8 @@ Arens_v2.0.5/Ship Modi
                     case 'shipmodi_fly':
                         const currentConsumption = calculateFuelConsumption(systemState.speed).toFixed(2);
                         menuContent = `
-Arens_v2.0.5/Ship Modi/Fly
--------------
+Arens_v2.0.7/Ship Modi/Fly
+=========================
 Fuel: ${systemState.fuel}%
 Fuel consumption: ${currentConsumption}%/ly
 Current Speed: ${systemState.speed.toLocaleString()}km/h
@@ -323,8 +328,8 @@ Nearest FTL Opportunity: ███████
 
                     case 'omniweb':
                         menuContent = `
-Arens_v2.0.5/Omniweb
--------------
+Arens_v2.0.7/Omniweb
+===================
 [1] Galactic News
 [2] System Maps
 [3] Contact Directory
@@ -335,8 +340,8 @@ Arens_v2.0.5/Omniweb
 
                     case 'settings':
                         menuContent = `
-Arens_v2.0.5/Settings
--------------
+Arens_v2.0.7/Settings
+====================
 [1] Display Settings
 [2] Audio Settings
 [3] Security Settings
@@ -376,7 +381,7 @@ Arens_v2.0.5/Settings
                                 menuStack.push('onoffrestart');
                                 return displayMenu('onoffrestart');
                             default:
-                                return `Invalid selection. Please choose 1-5.`;
+                                return `Invalid selection. Please choose 1-5.\n\n${displayMenu('main')}`;
                         }
 
                     case 'onoffrestart':
@@ -407,8 +412,18 @@ Arens_v2.0.5/Settings
                         if (selection === '1') {
                             menuStack.pop();
                             return displayMenu('main');
+                        } else if (selection === '2') {
+                            if (systemState.fuel >= 100) {
+                                response = "Fuel tanks are already at maximum capacity.";
+                            } else {
+                                const refuelAmount = 100 - systemState.fuel;
+                                systemState.fuel = 100;
+                                response = `Refueling complete. Added ${refuelAmount}% fuel.\nFuel level now at maximum capacity.`;
+                            }
+                            // Return just the response, let the terminal handle the menu display
+                            return response;
                         }
-                        return `Invalid selection. Please choose 1.\n\n${displayMenu('shipinfo')}`;
+                        return `Invalid selection. Please choose 1-2.\n\n${displayMenu('shipinfo')}`;
 
                     case 'shipmodi':
                         switch(selection) {
@@ -492,7 +507,7 @@ Arens_v2.0.5/Settings
                     case 'settings':
                         switch(selection) {
                             case '1':
-                                response = "Display Settings:\n- Current Theme: " + systemState.theme.charAt(0).toUpperCase() + systemState.theme.slice(1) + "\n- Brightness: 85%\n- Contrast: 70%\n- Font Size: 12pt\n- Screen Timeout: 5 minutes\n\nAvailable Themes: green, red, blue, amber";
+                                response = "Display Settings:\n- Current Theme: " + systemState.theme.charAt(0).toUpperCase() + systemState.theme.slice(1) + "\n- Brightness: 85%\n- Contrast: 70%\n- Font Size: 12pt\n- Screen Timeout: 5 minutes\n\nAvailable Themes: compcon, crimson, emerald";
                                 break;
                             case '2':
                                 response = "Audio Settings:\n- Volume: 75%\n- Alert Volume: 100%\n- Voice Commands: Disabled\n- Background Music: Off\n- Warning Tones: Enabled";
@@ -516,12 +531,10 @@ Arens_v2.0.5/Settings
             // Handle theme changes
             function handleThemeChange(themeName) {
                 // Remove all theme classes
-                $('body').removeClass('theme-green theme-red theme-blue theme-amber');
+                $('body').removeClass('theme-compcon theme-crimson theme-emerald');
 
-                // Add new theme class if not default green
-                if (themeName !== 'green') {
-                    $('body').addClass(`theme-${themeName}`);
-                }
+                // Add new theme class
+                $('body').addClass(`theme-${themeName}`);
 
                 // Update system state
                 systemState.theme = themeName;
@@ -529,45 +542,31 @@ Arens_v2.0.5/Settings
                 return `Theme changed to: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
             }
 
-            // Hidden easter egg command - with proper formatting
+            // Hidden easter egg command - simplified version without box formatting
             function handleFastfetch(term) {
                 const now = new Date();
                 const timestamp = now.toTimeString().split(' ')[0];
 
-                // Create a properly formatted box with alignment
-                const boxWidth = 42; // Width of the box
-                const header = "ARENS SYSTEM INFORMATION";
-                const padding = Math.floor((boxWidth - header.length - 4) / 2);
-
-                // Helper function to create a properly aligned line
-                function createLine(label, value) {
-                    const totalWidth = boxWidth - 4; // Subtract box borders and spaces
-                    const labelWidth = 18; // Fixed width for labels
-                    const valueWidth = totalWidth - labelWidth;
-                    return `│   ${label.padEnd(labelWidth)}${value.padStart(valueWidth)}   │`;
-                }
-
                 return `
-╭${'─'.repeat(boxWidth - 2)}╮
-│${' '.repeat(padding)}${header}${' '.repeat(boxWidth - 4 - padding - header.length)}│
-│${' '.repeat(boxWidth - 4)}│
-${createLine('OS:', 'StarOS v7.3.1')}
-${createLine('Host:', 'Krokodil-Class Cruiser')}
-${createLine('Kernel:', 'Quantum-9.4.2')}
-${createLine('Uptime:', '42 days, 7 hours')}
-${createLine('Shell:', 'Terminal v2.0.5')}
-${createLine('Resolution:', '80x24')}
-${createLine('WM:', 'HoloGrid Interface')}
-${createLine('CPU:', 'Fusion Core x4 @ 5.2GHz')}
-${createLine('Memory:', '11.8MB / 16MB')}
-${createLine('Storage:', '120MB SSD')}
-${createLine('Fuel Level:', `${systemState.fuel}%`)}
-${createLine('Current Speed:', `${systemState.speed.toLocaleString()} km/h`)}
-${createLine('Mode:', systemState.mode)}
-${createLine('Timestamp:', timestamp)}
-│${' '.repeat(boxWidth - 4)}│
-│   ${'█'.repeat(30).padEnd(boxWidth - 8)}   │
-╰${'─'.repeat(boxWidth - 2)}╯
+=== ARENS SYSTEM INFORMATION ===
+
+OS: StarOS v7.3.1
+Host: Krokodil-Class Cruiser
+Kernel: Quantum-9.4.2
+Uptime: 42 days, 7 hours
+Shell: Terminal v2.0.7
+Resolution: 80x24
+WM: HoloGrid Interface
+CPU: Fusion Core x4 @ 5.2GHz
+Memory: 11.8MB / 16MB
+Storage: 120MB SSD
+Fuel Level: ${systemState.fuel}%
+Current Speed: ${systemState.speed.toLocaleString()} km/h
+Mode: ${systemState.mode}
+Timestamp: ${timestamp}
+
+[██████████████████████████████] 100%
+System Status: OPTIMAL
 `.trim();
             }
 
@@ -587,12 +586,26 @@ ${createLine('Timestamp:', timestamp)}
                     return;
                 }
 
+                if (command.toLowerCase() === 'refuel' || command.toLowerCase() === 'refuel ship') {
+                    if (systemState.fuel >= 100) {
+                        this.echo("Fuel tanks are already at maximum capacity.");
+                    } else {
+                        const refuelAmount = 100 - systemState.fuel;
+                        systemState.fuel = 100;
+                        this.echo(`Refueling complete. Added ${refuelAmount}% fuel.\nFuel level now at maximum capacity.`);
+                    }
+                    // Always show the ship info menu after refueling
+                    this.echo("\n" + displayMenu('shipinfo'));
+                    return;
+                }
+
                 // Handle special commands
                 if (command.toLowerCase() === 'help') {
                     this.echo(`
 Arens Computer System Help:
 - Type menu numbers (1-5) to navigate
 - Type text commands like 'back', 'ship info', 'combat mode' etc.
+- Type 'refuel' to refuel the ship
 - Type 'status' to see system status
 - Type 'clear' to clear screen
 - Type 'help' to see this help message
@@ -675,7 +688,7 @@ Running full system diagnostics...
                 // Handle theme commands
                 if (command.toLowerCase().startsWith('theme ')) {
                     const themeName = command.toLowerCase().split(' ')[1];
-                    const validThemes = ['green', 'red', 'blue', 'amber'];
+                    const validThemes = ['compcon', 'crimson', 'emerald'];
                     if (validThemes.includes(themeName)) {
                         this.echo(handleThemeChange(themeName));
                     } else {
@@ -731,13 +744,13 @@ Running full system diagnostics...
             }, {
                 greetings: `
 ┌─────────────────────────────────────────────┐
-│   ARENS COMPUTER SYSTEM v2.0.5              │
-│   Initializing...                           │
+│   ARENS COMPUTER SYSTEM v2.0.7              │
+│   Lancer RPG Edition · Comp/Con Interface   │
 │   Memory check: 4.2MB free                  │
 │   System integrity: 100%                    │
 │                                             │
 │   Type 'help' for command assistance        │
-│   New in v2.0.5: Text command support       │
+│   Fixed in v2.0.7: Refueling system bug    │
 │   Use mouse wheel to scroll up/down         │
 └─────────────────────────────────────────────┘
 `,
@@ -746,7 +759,7 @@ Running full system diagnostics...
                 width: '100%',
                 prompt: function() {
                     const currentPath = menuStack.length > 0 ? menuStack.join('/') : 'main';
-                    return `Arens_v2.0.5/${currentPath}> `;
+                    return `Arens_v2.0.7/${currentPath}> `;
                 },
                 onInit: function() {
                     this.echo(displayMenu('main'));
@@ -772,15 +785,15 @@ Running full system diagnostics...
                     drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
                 }
 
-                // Matrix characters (simplified for performance)
-                const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/<=>^_";
+                // Matrix characters with Lancer-themed symbols
+                const matrixChars = "01LANCErRPgMkVSXCTHD+-*/<=>^_█▒░";
 
                 function draw() {
                     // Semi-transparent background for trail effect
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+                    ctx.fillStyle = "rgba(10, 14, 23, 0.05)";
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    ctx.fillStyle = "#0f0";
+                    ctx.fillStyle = "#5c6bc0";
                     ctx.font = fontSize + "px monospace";
 
                     // Draw characters
